@@ -12,7 +12,17 @@ def lay_phan_tu_ma_tran(hang, cot):
             return np.array(phantu).reshape(hang, cot)
         except ValueError :
             print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
-
+def nghich_dao_ma_tran(matran):
+    """Tính nghịch đảo"""
+    try:
+        if hang != cot:
+            raise ValueError("Ma trận vuông mới có thể tính nghịch đảo")
+        nghich_dao = np.linalg.inv(matran)
+        return nghich_dao
+    except np.linalg.LinAlgError:
+        raise ValueError("Ma trận không khả nghịch.")
+    except ValueError as loi:
+        raise ValueError(loi)
 
 # Nhập số lượng ma trận
 while True:
@@ -52,3 +62,12 @@ for i in range(n):
 for i, matr in enumerate(dsach):
     print(f"\nMa trận {i + 1}:")
     print(matr)
+
+#In nghịch đảo các ma trận
+for i, matr in enumerate(dsach):
+    print(f"\r\nNghịch đảo ma trận {i+1}: ")
+    try:
+        nghichdao = nghich_dao_ma_tran(matr)
+        print(nghichdao)
+    except ValueError as loi:
+        print(f"Không có ma trận nghịch đảo cho ma trận {i+1}")
