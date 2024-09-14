@@ -4,14 +4,14 @@ import numpy as np
 def lay_phan_tu_ma_tran(hang, cot):
     """Hàm để nhập các phần tử và kiểm tra định dạng đúng."""
     while True:
+        print(f"Nhập các phần tử cho ma trận dạng mảng 1 chiều (phải có {hang * cot} phần tử):")
+        phantu = list(map(float(input().split())))
         try:
-            print(f"Nhập các phần tử cho ma trận dạng mảng 1 chiều (phải có {hang * cot} phần tử):")
-            phantu = list(map(float, input().split()))
             if len(phantu) != hang * cot:
-                raise ValueError(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.")
+                print(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.Mời nhập lại")
             return np.array(phantu).reshape(hang, cot)
-        except ValueError as loi:
-            print(f"Lỗi: {loi}. Vui lòng nhập lại.")
+        except ValueError :
+            print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
 
 
 # Nhập số lượng ma trận
@@ -19,10 +19,11 @@ while True:
     try:
         n = int(input("Nhập số lượng ma trận (phải là số nguyên): "))
         if n <= 0:
-            raise ValueError("Số lượng ma trận phải là số nguyên dương.")
-        break
+            print("Số lượng ma trận phải là số nguyên dương.")
+        else:
+            break
     except ValueError:
-        print("Lỗi: Số lượng ma trận phải là số nguyên dương. Vui lòng nhập lại.")
+        print("Lỗi không đúng định dạng. Vui lòng nhập lại.")
 
 # Danh sách để lưu các ma trận
 dsach = []
@@ -35,10 +36,11 @@ for i in range(n):
             hang = int(input(f"Số hàng cho ma trận {i + 1}: "))
             cot = int(input(f"Số cột cho ma trận {i + 1}: "))
             if hang <= 0 or cot <= 0:
-                raise ValueError("Số hàng và số cột phải là các số nguyên dương.")
-            break
-        except ValueError as loi:
-            print(f"Lỗi: {loi}. Vui lòng nhập lại.")
+                print("Số hàng và số cột phải là các số nguyên dương.")
+            else:
+                break
+        except ValueError :
+            print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
 
     # Nhập các phần tử cho ma trận và kiểm tra
     matran = lay_phan_tu_ma_tran(hang, cot)
