@@ -17,9 +17,9 @@ def nghich_dao_ma_tran(matran):
     try:
         if hang != cot:
             raise ValueError("Ma trận vuông mới có thể tính nghịch đảo")
-        nghich_dao = np.linalg.inv(matran)
+        nghich_dao = np.linalg.inv(matran) #Tính nghịch đảo
         return nghich_dao
-    except np.linalg.LinAlgError:
+    except np.linalg.LinAlgError: #Khi không có nghịch đảo, numpy sinh lỗi np.linalg.LinAlgError
         raise ValueError("Ma trận không khả nghịch.")
     except ValueError as loi:
         raise ValueError(loi)
