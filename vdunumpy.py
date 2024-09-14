@@ -87,6 +87,31 @@ if kich_thuoc_dong_nhat:
     print(tong_matran)
 else:
     print("Không thể thực hiện phép cộng vì các ma trận có kích thước khác nhau.")
+# Chọn các ma trận trong danh sách để nhân                                                           
+while True:                                                                                          
+    try:                                                                                             
+        chon_nhan = list(map(int, input(f"Nhập các ma trận cần nhân (1 đến {n}): ").split()))        
+        if any(i < 1 or i > n for i in chon_nhan):                                                   
+            raise ValueError("Vị trí ma trận phải nằm trong khoảng hợp lệ.")                         
+        break                                                                                        
+    except ValueError:                                                                               
+        print(f"Lỗi: Vị trí không phù hợp. Vui lòng nhập lại.")                                      
+                                                                                                     
+# Lấy các ma trận được chỉ định từ dsach                                                             
+dsach_nhan = [dsach[i-1] for i in chon_nhan]                                                         
+                                                                                                     
+# Thực hiện phép nhân các ma trận (chỉ nhân khi kích thước phù hợp)                                  
+def nhan_ma_tran(dsach):                                                                             
+    """Nhân các ma trận trong danh sách."""                                                          
+    try:                                                                                             
+        ket_qua = dsach[0]                                                                           
+        for matran in dsach[1:]:                                                                     
+            if ket_qua.shape[1] != matran.shape[0]:                                                  
+                raise ValueError("Số cột của ma trận trước không bằng số hàng của ma trận sau.")     
+            ket_qua = np.dot(ket_qua, matran)  # Nhân ma trận                                        
+        return ket_qua                                                                               
+    except ValueError as loi:                                                                        
+        raise ValueError(loi)                                                                        
     
 #In nghịch đảo các ma trận
 for i, matr in enumerate(dsach):
