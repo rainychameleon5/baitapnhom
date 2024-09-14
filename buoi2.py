@@ -118,6 +118,22 @@ class MaTranApp:
     def show_result(self, result):
         self.result_text.delete(1.0, tk.END)
         self.result_text.insert(tk.END, str(result))
+    def show_result(self, result):
+    self.result_text.delete(1.0, tk.END)
+    
+    # Nếu kết quả là một số, kiểm tra xem nó có phải gần bằng 0 hay không
+    if isinstance(result, (int, float)) and np.isclose(result, 0):
+        messagebox.showwarning("Cảnh báo", "Kết quả gần bằng 0.")
+    
+    # Nếu kết quả là một ma trận, kiểm tra xem có phần tử nào không xác định không
+    if isinstance(result, np.ndarray):
+        if np.isnan(result).any():
+            messagebox.showerror("Lỗi", "Kết quả chứa giá trị không xác định (NaN).")
+        elif np.isclose(result, 0).all():
+            messagebox.showwarning("Cảnh báo", "Kết quả là ma trận gần như rỗng.")
+    
+    self.result_text.insert(tk.END, str(result))
+
 
 
 if __name__ == "__main__":
