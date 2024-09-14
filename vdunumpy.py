@@ -63,8 +63,23 @@ for i in range(n):
 for i, matr in enumerate(dsach):
     print(f"\nMa trận {i + 1}:")
     print(matr)
+
+#Chọn các ma trận trong danh sách để cộng
+while True:
+    try:
+        chon = list(map(int, input(f"Nhập các ma trận cần cộng (1 đến {n}): ").split()))
+        if any(i < 1 or i > n for i in chon):
+            raise ValueError("Vị trí ma trận phải nằm trong khoảng hợp lệ.")
+        break
+    except ValueError:
+        print(f"Lỗi: Vị trí không phù hợp.Vui lòng nhập lại.")
+
+# Lấy các ma trận được chỉ định từ dsach
+dsach_cong = [dsach[i-1] for i in chon]
+
 # Thực hiện phép cộng các ma trận (chỉ cộng khi các ma trận có cùng kích thước)
-kich_thuoc_dong_nhat = all(mat.shape == dsach[0].shape for mat in dsach)
+kich_thuoc_dong_nhat = all(mat.shape == dsach_cong[0].shape for mat in dsach_cong)
+
 
 if kich_thuoc_dong_nhat:
     tong_matran = sum(dsach)  # Thực hiện phép cộng từng phần tử của các ma trận
