@@ -63,6 +63,15 @@ for i in range(n):
 for i, matr in enumerate(dsach):
     print(f"\nMa trận {i + 1}:")
     print(matr)
+# Thực hiện phép cộng các ma trận (chỉ cộng khi các ma trận có cùng kích thước)
+kich_thuoc_dong_nhat = all(mat.shape == dsach[0].shape for mat in dsach)
+
+if kich_thuoc_dong_nhat:
+    tong_matran = sum(dsach)  # Thực hiện phép cộng từng phần tử của các ma trận
+    print("\nTổng của các ma trận:")
+    print(tong_matran)
+else:
+    print("Không thể thực hiện phép cộng vì các ma trận có kích thước khác nhau.")
     
 #In nghịch đảo các ma trận
 for i, matr in enumerate(dsach):
