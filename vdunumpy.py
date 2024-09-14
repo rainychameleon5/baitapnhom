@@ -5,7 +5,7 @@ def lay_phan_tu_ma_tran(hang, cot):
     """Hàm để nhập các phần tử và kiểm tra định dạng đúng."""
     while True:
         print(f"Nhập các phần tử cho ma trận dạng mảng 1 chiều (phải có {hang * cot} phần tử):")
-        phantu = list(map(float(input().split())))
+        phantu = list(map(float , input().split()))
         try:
             if len(phantu) != hang * cot:
                 print(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.Mời nhập lại")
