@@ -140,3 +140,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = MaTranApp(root)
     root.mainloop()
+    print("Done")
