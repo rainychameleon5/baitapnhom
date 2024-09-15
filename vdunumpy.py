@@ -82,7 +82,7 @@ kich_thuoc_dong_nhat = all(mat.shape == dsach_cong[0].shape for mat in dsach_con
 
 
 if kich_thuoc_dong_nhat:
-    tong_matran = sum(dsach)  # Thực hiện phép cộng từng phần tử của các ma trận
+    tong_matran = np.sum(dsach_cong, axis=0)  # Thực hiện phép cộng từng phần tử của các ma trận
     print("\nTổng của các ma trận:")
     print(tong_matran)
 else:
@@ -111,7 +111,11 @@ def nhan_ma_tran(dsach):
             ket_qua = np.dot(ket_qua, matran)  # Nhân ma trận                                        
         return ket_qua                                                                               
     except ValueError as loi:                                                                        
-        raise ValueError(loi)                                                                        
+        raise ValueError(loi)  
+kqua_nhan = nhan_ma_tran(dsach_nhan)
+if kqua_nhan is not None:
+    print("\nKết quả của phép nhân các ma trận là:")
+    print(kqua_nhan)
     
 #In nghịch đảo các ma trận
 for i, matr in enumerate(dsach):
