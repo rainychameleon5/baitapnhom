@@ -76,17 +76,20 @@ while True:
 
 # Lấy các ma trận được chỉ định từ dsach
 dsach_cong = [dsach[i-1] for i in chon]
-
-# Thực hiện phép cộng các ma trận (chỉ cộng khi các ma trận có cùng kích thước)
-kich_thuoc_dong_nhat = all(mat.shape == dsach_cong[0].shape for mat in dsach_cong)
-
-
-if kich_thuoc_dong_nhat:
-    tong_matran = np.sum(dsach_cong, axis=0)  # Thực hiện phép cộng từng phần tử của các ma trận
-    print("\nTổng của các ma trận:")
-    print(tong_matran)
+if len(dsach_cong)==0:
+    print("Không thực hiện vì không có ma trận để cộng")
+elif len(dsach_cong)==1:
+    print("Chỉ có 1 ma trận, không thực hiện phép cộng")
 else:
-    print("Không thể thực hiện phép cộng vì các ma trận có kích thước khác nhau.")
+    # Thực hiện phép cộng các ma trận (chỉ cộng khi các ma trận có cùng kích thước)
+    kich_thuoc_dong_nhat = all(mat.shape == dsach_cong[0].shape for mat in dsach_cong)
+    
+    if kich_thuoc_dong_nhat:
+        tong_matran = np.sum(dsach_cong, axis=0)  # Thực hiện phép cộng từng phần tử của các ma trận
+        print("\nTổng của các ma trận:")
+        print(tong_matran)
+    else:
+        print("Không thể thực hiện phép cộng vì các ma trận có kích thước khác nhau.")
 # Chọn các ma trận trong danh sách để nhân                                                           
 while True:                                                                                          
     try:                                                                                             
@@ -112,10 +115,18 @@ def nhan_ma_tran(dsach):
         return ket_qua                                                                               
     except ValueError as loi:                                                                        
         raise ValueError(loi)  
-kqua_nhan = nhan_ma_tran(dsach_nhan)
-if kqua_nhan is not None:
-    print("\nKết quả của phép nhân các ma trận là:")
-    print(kqua_nhan)
+
+if len(dsach_nhan)==0:
+    print("Không thực hiện vì không có ma trận để nhân")
+elif len(dsach_nhan)==1:
+    print("Chỉ có 1 ma trận, không thực hiện phép nhân")
+else:
+    try:
+        kqua_nhan = nhan_ma_tran(dsach_nhan)
+        print("\nKết quả của phép nhân các ma trận là:")
+        print(kqua_nhan)
+    except ValueError as loi:
+        print(loi)
     
 #In nghịch đảo các ma trận
 for i, matr in enumerate(dsach):
