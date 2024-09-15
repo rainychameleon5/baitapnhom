@@ -14,6 +14,17 @@ def lay_phan_tu_ma_tran(hang, cot):
         except ValueError :
             print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
 
+def dinh_thuc_ma_tran(matran):
+    """Tính định thức"""
+    try:
+        if hang!=cot:
+            raise ValueError("Ma trận vuông mới có thể tính định thức")
+        dinh_thuc = np.linalg.det(matran)
+        return dinh_thuc
+    except np.linalg.LinAlgError:
+        raise ValueError("Ma trận không thể tính định thức")
+
+
 def nghich_dao_ma_tran(matran):
     """Tính nghịch đảo"""
     try:
@@ -24,7 +35,7 @@ def nghich_dao_ma_tran(matran):
     except np.linalg.LinAlgError: #Khi không có nghịch đảo, numpy sinh lỗi np.linalg.LinAlgError
         raise ValueError("Ma trận không khả nghịch.")
     
-    
+
 
 # Nhập số lượng ma trận
 while True:
@@ -128,12 +139,21 @@ else:
         print(kqua_nhan)
     except ValueError as loi:
         print(loi)
-    
-#In nghịch đảo các ma trận
+
+#In ra định thức ma trận
+print("Định thức: ")
 for i, matr in enumerate(dsach):
-    print(f"\r\nNghịch đảo ma trận {i+1}: ")
+    try:
+        dinhthuc = dinh_thuc_ma_tran(matr)
+        print(f"\r\nĐịnh thức ma trận {i + 1}: {dinhthuc}")
+    except ValueError as loi:
+        print(f"Không tính được định thức cho ma trận {i+1}")
+
+#In nghịch đảo các ma trận
+print("Nghịch đảo: ")
+for i, matr in enumerate(dsach):
     try:
         nghichdao = nghich_dao_ma_tran(matr)
-        print(nghichdao)
+        print(f"\r\nNghịch đảo ma trận {i+1}: {nghichdao}")
     except ValueError as loi:
         print(f"Không có ma trận nghịch đảo cho ma trận {i+1}")
