@@ -1,144 +1,185 @@
 import numpy as np
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox, scrolledtext
 
 
-class MaTranApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Tính toán Ma trận")
+def lay_phan_tu_ma_tran(hang, cot):
+  """Hàm để nhập các phần tử và kiểm tra định dạng đúng."""
+  while True:
+    try:
+      print(f"Nhập các phần tử cho ma trận dạng mảng 1 chiều (phải có {hang * cot} phần tử):")
+      phantu = list(map(float, input().split()))
+      if len(phantu) != hang * cot:
+        print(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.Mời nhập lại")
+        continue  # Lắp lại việc nhập khi sai số lượng
+      return np.array(phantu).reshape(hang, cot)
+    except ValueError:
+      print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
 
-        # Khung nhập cho ma trận A
-        self.label_a = tk.Label(root, text="Nhập Ma trận A:")
-        self.label_a.grid(row=0, column=0)
 
-        self.entries_a = self.create_matrix_entries(3, 3, 1, 0)
+def dinh_thuc_ma_tran(matran):
+  """Tính định thức"""
+  try:
+    if matran.shape[0] != matran.shape[1]:
+      raise ValueError("Ma trận vuông mới có thể tính định thức")
+    dinh_thuc = np.linalg.det(matran)
+    return dinh_thuc
+  except np.linalg.LinAlgError:
+    raise ValueError("Ma trận không thể tính định thức")
 
-        # Khung nhập cho ma trận B
-        self.label_b = tk.Label(root, text="Nhập Ma trận B:")
-        self.label_b.grid(row=5, column=0)
 
-        self.entries_b = self.create_matrix_entries(3, 3, 6, 0)
+def nghich_dao_ma_tran(matran):
+  """Tính nghịch đảo"""
+  try:
+    if matran.shape[0] != matran.shape[1]:
+      raise ValueError("Ma trận vuông mới có thể tính nghịch đảo")
+    nghich_dao = np.linalg.inv(matran)  # Tính nghịch đảo
+    return nghich_dao
+  except np.linalg.LinAlgError:  # Khi không có nghịch đảo, numpy sinh lỗi np.linalg.LinAlgError
+    raise ValueError("Ma trận không khả nghịch.")
 
-        # Các nút tính toán
-        self.tinh_tong_btn = tk.Button(root, text="Tính Tổng", command=self.tinh_tong)
-        self.tinh_tong_btn.grid(row=10, column=0)
 
-        self.tinh_tich_btn = tk.Button(root, text="Tính Tích", command=self.tinh_tich)
-        self.tinh_tich_btn.grid(row=10, column=1)
+class MatrixOperationsGUI:
+  def __init__(self, master):
+    self.master = master
+    self.master.title("Matrix Operations")
+    self.master.geometry("800x600")
 
-        self.dinh_thuc_btn = tk.Button(root, text="Định Thức A", command=self.tinh_dinh_thuc_a)
-        self.dinh_thuc_btn.grid(row=10, column=2)
+    self.matrices = []
+    self.create_widgets()
 
-        self.dinh_thuc_b_btn = tk.Button(root, text="Định Thức B", command=self.tinh_dinh_thuc_b)
-        self.dinh_thuc_b_btn.grid(row=10, column=3)
+  def create_widgets(self):
+    # nhap matran
+    input_frame = ttk.LabelFrame(self.master, text="Nhập Ma Trận")
+    input_frame.pack(padx=10, pady=10, fill="x")
 
-        # Khung hiển thị kết quả
-        self.result_label = tk.Label(root, text="Kết quả:")
-        self.result_label.grid(row=11, column=0, columnspan=4)
-        self.result_text = tk.Text(root, height=5, width=40)
-        self.result_text.grid(row=12, column=0, columnspan=4)
+    ttk.Label(input_frame, text="Số hàng:").grid(row=0, column=0, padx=5, pady=5)
+    self.rows_entry = ttk.Entry(input_frame, width=5)
+    self.rows_entry.grid(row=0, column=1, padx=5, pady=5)
 
-    def create_matrix_entries(self, rows, cols, start_row, start_col):
-        entries = []
-        for i in range(rows):
-            row_entries = []
-            for j in range(cols):
-                entry = tk.Entry(self.root, width=5)
-                entry.grid(row=start_row + i, column=start_col + j)
-                row_entries.append(entry)
-            entries.append(row_entries)
-        return entries
+    ttk.Label(input_frame, text="Số cột:").grid(row=0, column=2, padx=5, pady=5)
+    self.cols_entry = ttk.Entry(input_frame, width=5)
+    self.cols_entry.grid(row=0, column=3, padx=5, pady=5)
 
-    def get_matrix_from_entries(self, entries):
-        try:
-            matrix = []
-            for row_entries in entries:
-                row = [float(entry.get()) for entry in row_entries]
-                matrix.append(row)
-            return np.array(matrix)
-        except ValueError:
-            messagebox.showerror("Lỗi", "Vui lòng nhập giá trị hợp lệ cho ma trận!")
-            return None
+    ttk.Label(input_frame, text="Các phần tử (cách nhau bởi dấu cách):").grid(row=1, column=0, columnspan=2, padx=5,
+                                                                              pady=5)
+    self.elements_entry = ttk.Entry(input_frame, width=50)
+    self.elements_entry.grid(row=1, column=2, columnspan=3, padx=5, pady=5)
 
-    def tinh_tong(self):
-        ma_tran_a = self.get_matrix_from_entries(self.entries_a)
-        ma_tran_b = self.get_matrix_from_entries(self.entries_b)
+    ttk.Button(input_frame, text="Thêm Ma Trận", command=self.add_matrix).grid(row=2, column=0, columnspan=5, pady=10)
 
-        if ma_tran_a is None or ma_tran_b is None:
-            return
+    # hienthi
+    display_frame = ttk.LabelFrame(self.master, text="Các Ma Trận")
+    display_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        if ma_tran_a.shape != ma_tran_b.shape:
-            messagebox.showerror("Lỗi", "Hai ma trận phải cùng kích thước để tính tổng!")
-            return
+    self.matrix_display = scrolledtext.ScrolledText(display_frame, wrap=tk.WORD, width=60, height=10)
+    self.matrix_display.pack(padx=5, pady=5, fill="both", expand=True)
 
-        tong = np.add(ma_tran_a, ma_tran_b)
-        self.show_result(tong)
+    # phep toan
+    operations_frame = ttk.LabelFrame(self.master, text="Các Phép Toán")
+    operations_frame.pack(padx=10, pady=10, fill="x")
 
-    def tinh_tich(self):
-        ma_tran_a = self.get_matrix_from_entries(self.entries_a)
-        ma_tran_b = self.get_matrix_from_entries(self.entries_b)
+    ttk.Button(operations_frame, text="Cộng Ma Trận", command=self.add_matrices).pack(side=tk.LEFT, padx=5, pady=5)
+    ttk.Button(operations_frame, text="Nhân Ma Trận", command=self.multiply_matrices).pack(side=tk.LEFT, padx=5, pady=5)
+    ttk.Button(operations_frame, text="Tính Định Thức", command=self.calculate_determinants).pack(side=tk.LEFT, padx=5,
+                                                                                                  pady=5)
+    ttk.Button(operations_frame, text="Tính Ma Trận Nghịch Đảo", command=self.calculate_inverses).pack(side=tk.LEFT,
+                                                                                                       padx=5, pady=5)
 
-        if ma_tran_a is None or ma_tran_b is None:
-            return
+    # ketqua
+    results_frame = ttk.LabelFrame(self.master, text="Kết Quả")
+    results_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        if ma_tran_a.shape[1] != ma_tran_b.shape[0]:
-            messagebox.showerror("Lỗi", "Số cột của A phải bằng số hàng của B để tính tích!")
-            return
+    self.results_display = scrolledtext.ScrolledText(results_frame, wrap=tk.WORD, width=60, height=10)
+    self.results_display.pack(padx=5, pady=5, fill="both", expand=True)
 
-        tich = np.dot(ma_tran_a, ma_tran_b)
-        self.show_result(tich)
+  def add_matrix(self):
+    try:
+      hang = int(self.rows_entry.get())
+      cot = int(self.cols_entry.get())
+      phantu = list(map(float, self.elements_entry.get().split()))
 
-    def tinh_dinh_thuc_a(self):
-        ma_tran_a = self.get_matrix_from_entries(self.entries_a)
+      if len(phantu) != hang * cot:
+        raise ValueError(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.")
 
-        if ma_tran_a is None:
-            return
+      matran = np.array(phantu).reshape(hang, cot)
+      self.matrices.append(matran)
+      self.update_matrix_display()
+      self.clear_input_fields()
+    except ValueError as e:
+      messagebox.showerror("Lỗi Nhập","Cần nhập các phần tử")
 
-        if ma_tran_a.shape[0] != ma_tran_a.shape[1]:
-            messagebox.showerror("Lỗi", "Ma trận A phải là ma trận vuông để tính định thức!")
-            return
+  def update_matrix_display(self):
+    self.matrix_display.delete(1.0, tk.END)
+    for i, matran in enumerate(self.matrices):
+      self.matrix_display.insert(tk.END, f"Ma trận {i + 1}:\n{matran}\n\n")
 
-        dinh_thuc = np.linalg.det(ma_tran_a)
-        self.show_result(dinh_thuc)
+  def clear_input_fields(self):
+    self.rows_entry.delete(0, tk.END)
+    self.cols_entry.delete(0, tk.END)
+    self.elements_entry.delete(0, tk.END)
 
-    def tinh_dinh_thuc_b(self):
-        ma_tran_b = self.get_matrix_from_entries(self.entries_b)
+  # phép nhân
+  def multiply_matrices(self):
+    if len(self.matrices) < 2:
+      messagebox.showwarning("Cảnh báo", "Cần ít nhất hai ma trận để thực hiện phép nhân.")
+      return
 
-        if ma_tran_b is None:
-            return
+    try:
+      kqua_nhan = self.matrices[0]
+      for matran in self.matrices[1:]:
+        if kqua_nhan.shape[1] != matran.shape[0]:
+          raise ValueError("Số cột của ma trận trước không bằng số hàng của ma trận sau.")
+        kqua_nhan = np.dot(kqua_nhan, matran)
+      self.display_result("Kết quả của phép nhân các ma trận", kqua_nhan)
+    except ValueError as e:
+      messagebox.showerror("Lỗi", str(e))
 
-        if ma_tran_b.shape[0] != ma_tran_b.shape[1]:
-            messagebox.showerror("Lỗi", "Ma trận B phải là ma trận vuông để tính định thức!")
-            return
+  #phép tổng
+  def add_matrices(self):
+    if len(self.matrices) < 2:
+      messagebox.showwarning("Cảnh báo", "Cần ít nhất hai ma trận để thực hiện phép cộng.")
+      return
 
-        dinh_thuc = np.linalg.det(ma_tran_b)
-        self.show_result(dinh_thuc)
+    try:
+      kich_thuoc_dong_nhat = all(mat.shape == self.matrices[0].shape for mat in self.matrices)
+      if not kich_thuoc_dong_nhat:
+        raise ValueError("Không thể thực hiện phép cộng vì các ma trận có kích thước khác nhau.")
 
-    def show_result(self, result):
-        self.result_text.delete(1.0, tk.END)
-        self.result_text.insert(tk.END, str(result))
-    def show_result(self, result):
-    self.result_text.delete(1.0, tk.END)
-    
-    # Nếu kết quả là một số, kiểm tra xem nó có phải gần bằng 0 hay không
-    if isinstance(result, (int, float)) and np.isclose(result, 0):
-        messagebox.showwarning("Cảnh báo", "Kết quả gần bằng 0.")
-    
-    # Nếu kết quả là một ma trận, kiểm tra xem có phần tử nào không xác định không
-    if isinstance(result, np.ndarray):
-        if np.isnan(result).any():
-            messagebox.showerror("Lỗi", "Kết quả chứa giá trị không xác định (NaN).")
-        elif np.isclose(result, 0).all():
-            messagebox.showwarning("Cảnh báo", "Kết quả là ma trận gần như rỗng.")
-    
-    self.result_text.insert(tk.END, str(result))
+      tong_matran = np.sum(self.matrices, axis=0)
+      self.display_result("Tổng của các ma trận", tong_matran)
+    except ValueError as e:
+      messagebox.showerror("Lỗi", str(e))
 
+
+  #định thức
+  def calculate_determinants(self):
+    results = []
+    for i, matran in enumerate(self.matrices):
+      try:
+        dinhthuc = dinh_thuc_ma_tran(matran)
+        results.append(f"Định thức ma trận {i + 1}: {dinhthuc}")
+      except ValueError as e:
+        results.append(f"Không tính được định thức cho ma trận {i + 1}: {str(e)}")
+    self.display_result("Định thức của các ma trận", "\n".join(results))
+
+  #nghịch đảo
+  def calculate_inverses(self):
+    results = []
+    for i, matran in enumerate(self.matrices):
+      try:
+        nghichdao = nghich_dao_ma_tran(matran)
+        results.append(f"Nghịch đảo ma trận {i + 1}:\n{nghichdao}\n")
+      except ValueError as e:
+        results.append(f"Không có ma trận nghịch đảo cho ma trận {i + 1}: {str(e)}")
+    self.display_result("Ma trận nghịch đảo", "\n".join(results))
+
+  def display_result(self, title, result):
+    self.results_display.delete(1.0, tk.END)
+    self.results_display.insert(tk.END, f"{title}:\n{result}")
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = MaTranApp(root)
-    root.mainloop()
-    print("Done")
-    print("Done")
+  root = tk.Tk()
+  app = MatrixOperationsGUI(root)
+  root.mainloop()
