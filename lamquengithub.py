@@ -141,3 +141,4 @@ if __name__ == "__main__":
     app = MaTranApp(root)
     root.mainloop()
     print("Done")
+    print("Done")
