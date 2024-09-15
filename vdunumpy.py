@@ -9,6 +9,7 @@ def lay_phan_tu_ma_tran(hang, cot):
             phantu = list(map(float, input().split()))
             if len(phantu) != hang * cot:
                 print(f"Số lượng phần tử phải là {hang * cot}, nhưng bạn đã nhập {len(phantu)} phần tử.Mời nhập lại")
+                continue #Lắp lại việc nhập khi sai số lượng
             return np.array(phantu).reshape(hang, cot)
         except ValueError :
             print(f"Lỗi không đúng định dạng. Vui lòng nhập lại.")
@@ -22,8 +23,8 @@ def nghich_dao_ma_tran(matran):
         return nghich_dao
     except np.linalg.LinAlgError: #Khi không có nghịch đảo, numpy sinh lỗi np.linalg.LinAlgError
         raise ValueError("Ma trận không khả nghịch.")
-    except ValueError as loi:
-        raise ValueError(loi)
+    
+    
 
 # Nhập số lượng ma trận
 while True:
