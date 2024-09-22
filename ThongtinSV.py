@@ -5,7 +5,7 @@ from tkinter import messagebox, simpledialog
 
 def load_data(file_path):
     """Load data from a CSV file into a numpy array."""
-    encondings = ['utf-8', 'ISO-8859-1', 'windows-1252']
+    encodings = ['utf-8', 'ISO-8859-1', 'windows-1252']
     for enc in encodings:
         try:
             data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding='utf-8', skip_header=1)
