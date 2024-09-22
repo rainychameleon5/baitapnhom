@@ -258,7 +258,8 @@ def main():
     tk.Button(root, text="Tìm kiếm sinh viên", command=create_search_window).pack(pady=10)
     tk.Button(root, text="Thêm sinh viên", command=create_add_student_window).pack(pady=10)
     tk.Button(root, text="Xếp hạng sinh viên", command=create_rank_window).pack(pady=10)
-
+    # Nút Thoát để đóng ứng dụng
+    tk.Button(root, text="Thoát", command=root.quit).pack(pady=10)
     root.mainloop()
 
 
