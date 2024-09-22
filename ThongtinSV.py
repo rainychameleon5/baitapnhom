@@ -153,8 +153,13 @@ def create_search_window():
             result = "Lựa chọn không hợp lệ."
 
         messagebox.showinfo("Kết quả", result)
+    
+    def go_back():
+        search_window.destroy()
+        
 
     tk.Button(search_window, text="Tìm kiếm", command=search_action).pack(pady=10)
+    tk.Button(search_window, text="Quay lại", command=go_back).pack(pady=5)
 
 
 def create_add_student_window():
@@ -209,14 +214,36 @@ def create_add_student_window():
             messagebox.showerror("Lỗi", result)
         else:
             messagebox.showinfo("Kết quả", result)
-            add_window.destroy()  # Đóng cửa sổ thêm sinh viên sau khi thêm thành công
+            
+            # Xóa dữ liệu trong các ô nhập sau khi thêm thành công
+            id_entry.delete(0, tk.END)
+            name_entry.delete(0, tk.END)
+            math_entry.delete(0, tk.END)
+            physics_entry.delete(0, tk.END)
+            chemistry_entry.delete(0, tk.END)
+    
+    def go_back():
+        add_window.destroy()
+           
 
     tk.Button(add_window, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
+    tk.Button(add_window, text="Quay lại", command=go_back).pack(pady=5)
 
 
 def create_rank_window():
     result = rank_students_by_total_score(data)
     messagebox.showinfo("Bảng xếp hạng", result)
+
+    def view_rank():
+        result = rank_students_by_total_score(data)
+        messagebox.showinfo("Bảng xếp hạng", result)
+
+    def go_back():
+        rank_window.destroy()
+
+    tk.Button(rank_window, text="Xem bảng xếp hạng", command=view_rank).pack(pady=10)
+    tk.Button(rank_window, text="Quay lại", command=go_back).pack(pady=5)
+
 
 
 def main():
