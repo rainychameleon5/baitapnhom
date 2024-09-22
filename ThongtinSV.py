@@ -90,7 +90,19 @@ def add_student_action():
     if not student_id or not name or not math_grade or not physics_grade or not chemistry_grade:
         messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
         return
+    #Chỉ cho phép nhập giá trị điểm từ 0 đến 10
+    try:
+        math_grade = float(math_grade)
+        physics_grade = float(physics_grade)
+        chemistry_grade = float(chemistry_grade)
 
+        if not (0 <= math_grade <= 10) or not (0 <= physics_grade <= 10) or not (0 <= chemistry_grade <= 10):
+            raise ValueError
+
+    except ValueError:
+        messagebox.showerror("Lỗi", "Điểm phải là số thực trong khoảng từ 0 đến 10.")
+        return
+    
     result = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
     messagebox.showinfo("Kết quả", result)
 
