@@ -221,7 +221,14 @@ def create_add_student_window():
             math_entry.delete(0, tk.END)
             physics_entry.delete(0, tk.END)
             chemistry_entry.delete(0, tk.END)
-    
+    def clear_entries():
+        """Xóa tất cả dữ liệu trong các ô nhập."""
+        id_entry.delete(0, tk.END)
+        name_entry.delete(0, tk.END)
+        math_entry.delete(0, tk.END)
+        physics_entry.delete(0, tk.END)
+        chemistry_entry.delete(0, tk.END)
+        
     def go_back():
         add_window.destroy()
            
@@ -242,6 +249,7 @@ def create_rank_window():
         rank_window.destroy()
 
     tk.Button(rank_window, text="Xem bảng xếp hạng", command=view_rank).pack(pady=10)
+    tk.Button(add_window, text="Xóa thông tin", command=clear_entries).pack(pady=5)
     tk.Button(rank_window, text="Quay lại", command=go_back).pack(pady=5)
 
 
