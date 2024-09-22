@@ -12,6 +12,32 @@ def load_data(file_path):
         print(f"Error loading data: {e}")
         return np.array([])
 
+def save_data(file_path, data):
+    """Lưu dữ liệu sinh viên vào file CSV."""
+    header = "ID,Tên,Môn học,Điểm"
+    try:
+        np.savetxt(file_path, data, delimiter=",", fmt="%s", header=header, comments='', encoding='utf-8')
+        return True
+    except Exception as e:
+        print(f"Error saving data: {e}")
+        return False
+
+def add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade):
+    """Thêm thông tin sinh viên"""
+    try:
+        new_rows = [
+            [student_id, name, "Toán", math_grade],
+            [student_id, name, "Lý", physics_grade],
+            [student_id, name, "Hóa", chemistry_grade]
+        ]
+        data = np.vstack((load_data(file_path), new_rows))  # Append new rows to the data
+        success = save_data(file_path, data)
+        if success:
+            return f"Thêm dữ liệu cho sinh viên {name} (ID: {student_id}) thành công!"
+        else:
+            return "Không thể lưu dữ liệu vào file."
+    except Exception as e:
+        return f"Lỗi khi thêm dữ liệu: {e}"
 
 def search_student(data, student_id):
     """Search for a student's information by ID."""
@@ -53,6 +79,20 @@ def calculate_average(data, student_id):
         except ValueError:
             return "Có lỗi khi chuyển đổi điểm sang số thực. Vui lòng kiểm tra dữ liệu."
 
+def add_student_action():
+    """Thêm thông tin"""
+    student_id = id_entry.get()
+    name = name_entry.get()
+    math_grade = math_entry.get()
+    physics_grade = physics_entry.get()
+    chemistry_grade = chemistry_entry.get()
+
+    if not student_id or not name or not math_grade or not physics_grade or not chemistry_grade:
+        messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
+        return
+
+    result = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
+    messagebox.showinfo("Kết quả", result)
 
 def search_action():
     choice = choice_var.get()
@@ -100,6 +140,28 @@ def main():
     subject_entry = tk.Entry(root)
     subject_entry.pack(pady=5)
 
+    tk.Label(root, text="Tên sinh viên:").pack(pady=5)
+    global name_entry
+    name_entry = tk.Entry(root)
+    name_entry.pack(pady=5)
+
+    tk.Label(root, text="Điểm Toán:").pack(pady=5)
+    global math_entry
+    math_entry = tk.Entry(root)
+    math_entry.pack(pady=5)
+
+    tk.Label(root, text="Điểm Lý:").pack(pady=5)
+    global physics_entry
+    physics_entry = tk.Entry(root)
+    physics_entry.pack(pady=5)
+
+    tk.Label(root, text="Điểm Hóa:").pack(pady=5)
+    global chemistry_entry
+    chemistry_entry = tk.Entry(root)
+    chemistry_entry.pack(pady=5)
+
+    
+    tk.Button(root, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
     tk.Button(root, text="Tìm kiếm", command=search_action).pack(pady=10)
 
     root.mainloop()
