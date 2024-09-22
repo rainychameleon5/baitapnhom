@@ -8,13 +8,14 @@ def load_data(file_path):
     encodings = ['utf-8', 'ISO-8859-1', 'windows-1252']
     for enc in encodings:
         try:
-            data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding='utf-8', skip_header=1)
+            data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding=enc, skip_header=1)
             return data
         except Exception as e:
             print(f"Error loading data with encoding {enc}: {e}")
 
     print("Failed to load data with all attempted encodings.")
     return np.array([])
+
 
 def save_data(file_path, data):
     """Lưu dữ liệu sinh viên vào file CSV."""
@@ -26,15 +27,22 @@ def save_data(file_path, data):
         print(f"Error saving data: {e}")
         return False
 
+
 def add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade):
     """Thêm thông tin sinh viên"""
     try:
+        existing_data = load_data(file_path)
+
+        # Kiểm tra xem ID đã tồn tại chưa
+        if student_id in existing_data[:, 0]:
+            return "ID sinh viên đã tồn tại. Vui lòng sử dụng ID khác."
+
         new_rows = [
             [student_id, name, "Toán", math_grade],
             [student_id, name, "Lý", physics_grade],
             [student_id, name, "Hóa", chemistry_grade]
         ]
-        data = np.vstack((load_data(file_path), new_rows))  # Append new rows to the data
+        data = np.vstack((existing_data, new_rows))  # Append new rows to the data
         success = save_data(file_path, data)
         if success:
             return f"Thêm dữ liệu cho sinh viên {name} (ID: {student_id}) thành công!"
@@ -42,6 +50,7 @@ def add_student_data(file_path, student_id, name, math_grade, physics_grade, che
             return "Không thể lưu dữ liệu vào file."
     except Exception as e:
         return f"Lỗi khi thêm dữ liệu: {e}"
+
 
 def search_student(data, student_id):
     """Search for a student's information by ID."""
@@ -83,72 +92,25 @@ def calculate_average(data, student_id):
         except ValueError:
             return "Có lỗi khi chuyển đổi điểm sang số thực. Vui lòng kiểm tra dữ liệu."
 
-def add_student_action():
-    """Thêm thông tin"""
-    student_id = id_entry.get()
-    name = name_entry.get()
-    math_grade = math_entry.get()
-    physics_grade = physics_entry.get()
-    chemistry_grade = chemistry_entry.get()
-
-    if not student_id or not name or not math_grade or not physics_grade or not chemistry_grade:
-        messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
-        return
-    #Chỉ cho phép nhập giá trị điểm từ 0 đến 10
-    try:
-        math_grade = float(math_grade)
-        physics_grade = float(physics_grade)
-        chemistry_grade = float(chemistry_grade)
-
-        if not (0 <= math_grade <= 10) or not (0 <= physics_grade <= 10) or not (0 <= chemistry_grade <= 10):
-            raise ValueError
-
-    except ValueError:
-        messagebox.showerror("Lỗi", "Điểm phải là số thực trong khoảng từ 0 đến 10.")
-        return
-    
-    result = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
-    messagebox.showinfo("Kết quả", result)
-
-def search_action():
-    choice = choice_var.get()
-    student_id = id_entry.get()
-    subject_name = subject_entry.get()
-
-    if choice == '1':  # Tìm kiếm thông tin sinh viên
-        result = search_student(data, student_id)
-    elif choice == '2':  # Tìm kiếm điểm môn học
-        result = search_subject(data, subject_name)
-    elif choice == '3':  # Tính TBC điểm của sinh viên
-        result = calculate_average(data, student_id)
-    else:
-        result = "Lựa chọn không hợp lệ."
-
-    messagebox.showinfo("Kết quả", result)
 
 def rank_students_by_total_score(data):
     """Sắp xếp theo tổng điểm"""
     if data.size == 0:
         return "Dữ liệu không được tải."
 
-    # Dictionary để lưu tổng điểm của các sinh viên
     student_scores = {}
 
     try:
-        # Iterate over the data to calculate total scores
         for row in data:
             student_id, name, subject, grade = row[0], row[1], row[2], float(row[3])
 
             if student_id not in student_scores:
                 student_scores[student_id] = {"name": name, "total_score": 0}
 
-            # Add the grade to the student's total score
             student_scores[student_id]["total_score"] += grade
 
-        # Convert dictionary to a list of tuples and sort by total score in descending order
         ranked_students = sorted(student_scores.items(), key=lambda x: x[1]["total_score"], reverse=True)
 
-        # Format the result into a string for display
         result = "Bảng xếp hạng theo tổng điểm:\n"
         for idx, (student_id, info) in enumerate(ranked_students, start=1):
             result += f"{idx}. ID: {student_id}, Tên: {info['name']}, Tổng điểm: {info['total_score']:.2f}\n"
@@ -157,65 +119,119 @@ def rank_students_by_total_score(data):
     except ValueError:
         return "Có lỗi khi tính toán điểm. Vui lòng kiểm tra dữ liệu."
 
-def rank_action():
+
+def create_search_window():
+    search_window = tk.Toplevel(root)
+    search_window.title("Tìm kiếm thông tin sinh viên")
+
+    choice_var = tk.StringVar(value='1')
+
+    tk.Radiobutton(search_window, text="Tìm kiếm thông tin sinh viên", variable=choice_var, value='1').pack(anchor='w')
+    tk.Radiobutton(search_window, text="Tìm kiếm điểm môn học", variable=choice_var, value='2').pack(anchor='w')
+    tk.Radiobutton(search_window, text="Tính TBC điểm của sinh viên", variable=choice_var, value='3').pack(anchor='w')
+
+    tk.Label(search_window, text="ID sinh viên:").pack(pady=5)
+    id_entry = tk.Entry(search_window)
+    id_entry.pack(pady=5)
+
+    tk.Label(search_window, text="Tên môn học (nếu có):").pack(pady=5)
+    subject_entry = tk.Entry(search_window)
+    subject_entry.pack(pady=5)
+
+    def search_action():
+        choice = choice_var.get()
+        student_id = id_entry.get()
+        subject_name = subject_entry.get()
+
+        if choice == '1':
+            result = search_student(data, student_id)
+        elif choice == '2':
+            result = search_subject(data, subject_name)
+        elif choice == '3':
+            result = calculate_average(data, student_id)
+        else:
+            result = "Lựa chọn không hợp lệ."
+
+        messagebox.showinfo("Kết quả", result)
+
+    tk.Button(search_window, text="Tìm kiếm", command=search_action).pack(pady=10)
+
+
+def create_add_student_window():
+    add_window = tk.Toplevel(root)
+    add_window.title("Thêm sinh viên mới")
+
+    tk.Label(add_window, text="ID sinh viên:").pack(pady=5)
+    id_entry = tk.Entry(add_window)
+    id_entry.pack(pady=5)
+
+    tk.Label(add_window, text="Tên sinh viên:").pack(pady=5)
+    name_entry = tk.Entry(add_window)
+    name_entry.pack(pady=5)
+
+    tk.Label(add_window, text="Điểm Toán:").pack(pady=5)
+    math_entry = tk.Entry(add_window)
+    math_entry.pack(pady=5)
+
+    tk.Label(add_window, text="Điểm Lý:").pack(pady=5)
+    physics_entry = tk.Entry(add_window)
+    physics_entry.pack(pady=5)
+
+    tk.Label(add_window, text="Điểm Hóa:").pack(pady=5)
+    chemistry_entry = tk.Entry(add_window)
+    chemistry_entry.pack(pady=5)
+
+    def add_student_action():
+        student_id = id_entry.get()
+        name = name_entry.get()
+        math_grade = math_entry.get()
+        physics_grade = physics_entry.get()
+        chemistry_grade = chemistry_entry.get()
+
+        if not student_id or not name or not math_grade or not physics_grade or not chemistry_grade:
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
+            return
+
+        try:
+            math_grade = float(math_grade)
+            physics_grade = float(physics_grade)
+            chemistry_grade = float(chemistry_grade)
+
+            if not (0 <= math_grade <= 10) or not (0 <= physics_grade <= 10) or not (0 <= chemistry_grade <= 10):
+                raise ValueError
+
+        except ValueError:
+            messagebox.showerror("Lỗi", "Điểm phải là số thực trong khoảng từ 0 đến 10.")
+            return
+
+        result = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
+        if result.startswith("ID sinh viên đã tồn tại"):
+            messagebox.showerror("Lỗi", result)
+        else:
+            messagebox.showinfo("Kết quả", result)
+            add_window.destroy()  # Đóng cửa sổ thêm sinh viên sau khi thêm thành công
+
+    tk.Button(add_window, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
+
+
+def create_rank_window():
     result = rank_students_by_total_score(data)
     messagebox.showinfo("Bảng xếp hạng", result)
 
+
 def main():
-    global data
-    file_path = 'data.csv'  # Đặt đường dẫn đến file dữ liệu của bạn
+    global root, data, file_path
+    file_path = 'data.csv'
     data = load_data(file_path)
 
-    # Tạo cửa sổ chính
     root = tk.Tk()
-    root.title("Tìm kiếm thông tin sinh viên")
+    root.title("Hệ thống Quản lý Sinh viên")
+    root.geometry("300x200")
 
-    # Thêm các widget
-    tk.Label(root, text="Chọn hành động:").pack(pady=5)
+    tk.Button(root, text="Tìm kiếm sinh viên", command=create_search_window).pack(pady=10)
+    tk.Button(root, text="Thêm sinh viên", command=create_add_student_window).pack(pady=10)
+    tk.Button(root, text="Xếp hạng sinh viên", command=create_rank_window).pack(pady=10)
 
-    global choice_var
-    choice_var = tk.StringVar(value='1')
-
-    tk.Radiobutton(root, text="Tìm kiếm thông tin sinh viên", variable=choice_var, value='1').pack(anchor='w')
-    tk.Radiobutton(root, text="Tìm kiếm điểm môn học", variable=choice_var, value='2').pack(anchor='w')
-    tk.Radiobutton(root, text="Tính TBC điểm của sinh viên", variable=choice_var, value='3').pack(anchor='w')
-
-    tk.Label(root, text="ID sinh viên:").pack(pady=5)
-    global id_entry
-    id_entry = tk.Entry(root)
-    id_entry.pack(pady=5)
-
-    tk.Label(root, text="Tên môn học (nếu có):").pack(pady=5)
-    global subject_entry
-    subject_entry = tk.Entry(root)
-    subject_entry.pack(pady=5)
-
-    tk.Label(root, text="Tên sinh viên:").pack(pady=5)
-    global name_entry
-    name_entry = tk.Entry(root)
-    name_entry.pack(pady=5)
-
-    tk.Label(root, text="Điểm Toán:").pack(pady=5)
-    global math_entry
-    math_entry = tk.Entry(root)
-    math_entry.pack(pady=5)
-
-    tk.Label(root, text="Điểm Lý:").pack(pady=5)
-    global physics_entry
-    physics_entry = tk.Entry(root)
-    physics_entry.pack(pady=5)
-
-    tk.Label(root, text="Điểm Hóa:").pack(pady=5)
-    global chemistry_entry
-    chemistry_entry = tk.Entry(root)
-    chemistry_entry.pack(pady=5)
-
-    
-    tk.Button(root, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
-    tk.Button(root, text="Tìm kiếm", command=search_action).pack(pady=10)
-    # Thêm nút cho bảng xếp bảng
-    tk.Button(root, text="Xếp hạng sinh viên", command=rank_action).pack(pady=10)
-    
     root.mainloop()
 
 
