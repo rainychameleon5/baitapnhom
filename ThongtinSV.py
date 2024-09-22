@@ -5,12 +5,16 @@ from tkinter import messagebox, simpledialog
 
 def load_data(file_path):
     """Load data from a CSV file into a numpy array."""
-    try:
-        data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding='utf-8', skip_header=1)
-        return data
-    except Exception as e:
-        print(f"Error loading data: {e}")
-        return np.array([])
+    encondings = ['utf-8', 'ISO-8859-1', 'windows-1252']
+    for enc in encodings:
+        try:
+            data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding='utf-8', skip_header=1)
+            return data
+        except Exception as e:
+            print(f"Error loading data with encoding {enc}: {e}")
+
+    print("Failed to load data with all attempted encodings.")
+    return np.array([])
 
 def save_data(file_path, data):
     """Lưu dữ liệu sinh viên vào file CSV."""
