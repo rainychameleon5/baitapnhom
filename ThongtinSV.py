@@ -231,8 +231,8 @@ def create_add_student_window():
 
 
 def create_rank_window():
-    result = rank_students_by_total_score(data)
-    messagebox.showinfo("Bảng xếp hạng", result)
+    rank_window = tk.Toplevel(root)
+    rank_window.title("Bảng xếp hạng")
 
     def view_rank():
         result = rank_students_by_total_score(data)
