@@ -126,6 +126,40 @@ def search_action():
 
     messagebox.showinfo("Kết quả", result)
 
+def rank_students_by_total_score(data):
+    """Sắp xếp theo tổng điểm"""
+    if data.size == 0:
+        return "Dữ liệu không được tải."
+
+    # Dictionary để lưu tổng điểm của các sinh viên
+    student_scores = {}
+
+    try:
+        # Iterate over the data to calculate total scores
+        for row in data:
+            student_id, name, subject, grade = row[0], row[1], row[2], float(row[3])
+
+            if student_id not in student_scores:
+                student_scores[student_id] = {"name": name, "total_score": 0}
+
+            # Add the grade to the student's total score
+            student_scores[student_id]["total_score"] += grade
+
+        # Convert dictionary to a list of tuples and sort by total score in descending order
+        ranked_students = sorted(student_scores.items(), key=lambda x: x[1]["total_score"], reverse=True)
+
+        # Format the result into a string for display
+        result = "Bảng xếp hạng theo tổng điểm:\n"
+        for idx, (student_id, info) in enumerate(ranked_students, start=1):
+            result += f"{idx}. ID: {student_id}, Tên: {info['name']}, Tổng điểm: {info['total_score']:.2f}\n"
+
+        return result
+    except ValueError:
+        return "Có lỗi khi tính toán điểm. Vui lòng kiểm tra dữ liệu."
+
+def rank_action():
+    result = rank_students_by_total_score(data)
+    messagebox.showinfo("Bảng xếp hạng", result)
 
 def main():
     global data
@@ -179,7 +213,9 @@ def main():
     
     tk.Button(root, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
     tk.Button(root, text="Tìm kiếm", command=search_action).pack(pady=10)
-
+    # Thêm nút cho bảng xếp bảng
+    tk.Button(root, text="Xếp hạng sinh viên", command=rank_action).pack(pady=10)
+    
     root.mainloop()
 
 
