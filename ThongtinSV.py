@@ -1,6 +1,6 @@
 import numpy as np
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, filedialog
 
 
 def load_data(file_path):
@@ -42,7 +42,7 @@ def add_student_data(file_path, student_id, name, math_grade, physics_grade, che
             [student_id, name, "Lý", physics_grade],
             [student_id, name, "Hóa", chemistry_grade]
         ]
-        data = np.vstack((existing_data, new_rows))  # Append new rows to the data
+        existing_data = np.vstack((existing_data, new_rows))  # Append new rows to the data
         success = save_data(file_path, data)
         if success:
             return f"Thêm dữ liệu cho sinh viên {name} (ID: {student_id}) thành công!"
@@ -138,6 +138,9 @@ def create_search_window():
     subject_entry = tk.Entry(search_window)
     subject_entry.pack(pady=5)
 
+    result_label = tk.Label(search_window, text="", anchor="w", justify="left")
+    result_label.pack(pady=10)
+    
     def search_action():
         choice = choice_var.get()
         student_id = id_entry.get()
@@ -152,7 +155,7 @@ def create_search_window():
         else:
             result = "Lựa chọn không hợp lệ."
 
-        messagebox.showinfo("Kết quả", result)
+        result_label.config(text=result)
     
     def go_back():
         search_window.destroy()
@@ -209,11 +212,12 @@ def create_add_student_window():
             messagebox.showerror("Lỗi", "Điểm phải là số thực trong khoảng từ 0 đến 10.")
             return
 
-        result = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
-        if result.startswith("ID sinh viên đã tồn tại"):
-            messagebox.showerror("Lỗi", result)
+        data = add_student_data(file_path, student_id, name, math_grade, physics_grade, chemistry_grade)
+
+        if isinstance(data, str):  # Nếu có thông báo lỗi
+          messagebox.showerror("Lỗi", data)
         else:
-            messagebox.showinfo("Kết quả", result)
+          messagebox.showinfo("Kết quả", f"Thêm dữ liệu cho sinh viên {name} (ID: {student_id}) thành công!")
             
             # Xóa dữ liệu trong các ô nhập sau khi thêm thành công
             id_entry.delete(0, tk.END)
@@ -221,20 +225,21 @@ def create_add_student_window():
             math_entry.delete(0, tk.END)
             physics_entry.delete(0, tk.END)
             chemistry_entry.delete(0, tk.END)
-    def clear_entries():
-        """Xóa tất cả dữ liệu trong các ô nhập."""
-        id_entry.delete(0, tk.END)
-        name_entry.delete(0, tk.END)
-        math_entry.delete(0, tk.END)
-        physics_entry.delete(0, tk.END)
-        chemistry_entry.delete(0, tk.END)
-        
-    def go_back():
-        add_window.destroy()
-           
+        def clear_entries():
+            """Xóa tất cả dữ liệu trong các ô nhập."""
+            id_entry.delete(0, tk.END)
+            name_entry.delete(0, tk.END)
+            math_entry.delete(0, tk.END)
+            physics_entry.delete(0, tk.END)
+            chemistry_entry.delete(0, tk.END)
+            
+        def go_back():
+            add_window.destroy()
+               
 
-    tk.Button(add_window, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
-    tk.Button(add_window, text="Quay lại", command=go_back).pack(pady=5)
+        tk.Button(add_window, text="Thêm sinh viên", command=add_student_action).pack(pady=10)
+        tk.Button(add_window, text="Xóa thông tin", command=clear_entries).pack(pady=5)
+        tk.Button(add_window, text="Quay lại", command=go_back).pack(pady=5)
 
 
 def create_rank_window():
@@ -249,20 +254,26 @@ def create_rank_window():
         rank_window.destroy()
 
     tk.Button(rank_window, text="Xem bảng xếp hạng", command=view_rank).pack(pady=10)
-    tk.Button(add_window, text="Xóa thông tin", command=clear_entries).pack(pady=5)
     tk.Button(rank_window, text="Quay lại", command=go_back).pack(pady=5)
 
-
+def load_file():
+    global data, file_path
+    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    if file_path:
+        data = load_data(file_path)
+        if data.size == 0:
+            messagebox.showerror("Lỗi", "Không thể tải dữ liệu từ file.")
 
 def main():
     global root, data, file_path
-    file_path = 'data.csv'
+    file_path = ''
     data = load_data(file_path)
 
     root = tk.Tk()
     root.title("Hệ thống Quản lý Sinh viên")
-    root.geometry("300x200")
+    root.geometry("400x400")
 
+    tk.Button(root, text="Tải file CSV", command=load_file).pack(pady=10)
     tk.Button(root, text="Tìm kiếm sinh viên", command=create_search_window).pack(pady=10)
     tk.Button(root, text="Thêm sinh viên", command=create_add_student_window).pack(pady=10)
     tk.Button(root, text="Xếp hạng sinh viên", command=create_rank_window).pack(pady=10)
