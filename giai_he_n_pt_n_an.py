@@ -39,7 +39,7 @@ class EquationSolver:
     def validate_and_update(self):
         try:
             n = int(self.n.get())
-            if n < 1:
+            if n < 2:
                 raise ValueError("Số phương trình/ẩn phải lớn hơn 1")
             self.update_matrix()
         except ValueError:
