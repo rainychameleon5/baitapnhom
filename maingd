@@ -1,0 +1,25 @@
+import tkinter as tk
+import subprocess
+
+# Function to open VDU.py (Giao diện 2)
+def open_vdu():
+    subprocess.run(["python", "D:/4/ma nguon mo/bai nhom/pythonProject1/VDU.py"])  # Replace with the path to VDU.py, ở git là giai he pt
+
+# Function to open Buoi2.py (Giao diện 3)
+def open_buoi2():
+    subprocess.run(["python", "D:/4/ma nguon mo/bai nhom/pythonProject1/buoi2.py"])  # Replace with the path to buoi2.py, ở git là vdunumpy
+
+# Main Window Setup
+root = tk.Tk()
+root.title("Chọn Chức Năng")
+root.geometry("300x200")
+
+# Buttons to open other windows
+btn_vdu = tk.Button(root, text="Tính hệ phương trình", command=open_vdu)
+btn_vdu.pack(pady=20)
+
+btn_buoi2 = tk.Button(root, text="Tính toán ma trận", command=open_buoi2)
+btn_buoi2.pack(pady=20)
+
+# Run the main window
+root.mainloop()
