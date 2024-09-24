@@ -1,51 +1,95 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
 import numpy as np
 
+class EquationSolver:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Giải hệ phương trình n ẩn")
+        self.master.geometry("600x400")
 
-def nhap_n():
-    while True:
-        try:
-            n = int(input('Nhập số lượng ẩn: '))
-            if n <= 0:
-                raise ValueError("Số lượng ẩn phải là số nguyên dương.")
-            else:
-                return n
-        except:
-            print("Lỗi! Vui lòng nhập lại đúng định dạng")
+        self.n = tk.StringVar(value="2")  # Changed to StringVar
+        self.A = []
+        self.B = []
+        self.result_vars = []
 
-def nhap_ptu(ptu):
-    while True:
+        self.create_widgets()
+
+    def create_widgets(self):
+        main_frame = ttk.Frame(self.master, padding="10")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+
+        ttk.Label(main_frame, text="Số phương trình/ẩn:").grid(column=0, row=0, sticky=tk.W)
+        n_entry = ttk.Entry(main_frame, width=5, textvariable=self.n)
+        n_entry.grid(column=1, row=0, sticky=tk.W)
+        ttk.Button(main_frame, text="Cập nhật", command=self.validate_and_update).grid(column=2, row=0, sticky=tk.W)
+
+        self.equation_frame = ttk.Frame(main_frame, padding="10")
+        self.equation_frame.grid(column=0, row=1, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        ttk.Button(main_frame, text="Giải hệ phương trình", command=self.solve_equation).grid(column=0, row=2, columnspan=3, pady=10)
+
+        self.result_frame = ttk.Frame(main_frame, padding="10")
+        self.result_frame.grid(column=0, row=3, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+        self.update_matrix()
+
+    def validate_and_update(self):
         try:
-            gtri = float(input(ptu))
-            return gtri
+            n = int(self.n.get())
+            if n < 1:
+                raise ValueError("Số phương trình/ẩn phải lớn hơn 1")
+            self.update_matrix()
         except ValueError:
-            print("Lỗi! Vui lòng nhập lại đúng định dạng")
+            messagebox.showerror("Lỗi", "Mời nhập đúng định dạng")
 
+    def update_matrix(self):
+        for widget in self.equation_frame.winfo_children():
+            widget.destroy()
 
-def tinh_toan():
-    # Nhập số ẩn (số phương trình)
-    n = nhap_n()
+        n = int(self.n.get())
+        self.A = []
+        self.B = []
 
-    # Khởi tạo ma trận hệ số A và vector B
-    A = np.zeros((n, n))
-    B = np.zeros(n)
+        ttk.Label(self.equation_frame, text="Ma trận A:").grid(row=0, column=0, columnspan=n, sticky=tk.W)
+        ttk.Label(self.equation_frame, text="Vector B:").grid(row=0, column=n, sticky=tk.W)
 
-    # Nhập ma trận hệ số A
-    print("Nhập các hệ số của ma trận A:")
-    for i in range(n):
-        for j in range(n):
-            A[i][j] = nhap_ptu(f"A[{i+1}][{j+1}] = ")
+        for i in range(n):
+            row = []
+            for j in range(n):
+                entry = ttk.Entry(self.equation_frame, width=5)
+                entry.grid(row=i+1, column=j, padx=2, pady=2)
+                row.append(entry)
+            self.A.append(row)
 
-    # Nhập vector B
-    print("Nhập các giá trị của vector B:")
-    for i in range(n):
-        B[i] = nhap_ptu(f"B[{i+1}] = ")
+            b_entry = ttk.Entry(self.equation_frame, width=5)
+            b_entry.grid(row=i+1, column=n, padx=2, pady=2)
+            self.B.append(b_entry)
 
-    # Giải hệ phương trình
-    try:
-        X = np.linalg.solve(A, B)
-        print(f"Nghiệm của hệ phương trình là: {X}")
-    except np.linalg.LinAlgError:
-        print("Hệ phương trình không có nghiệm duy nhất (ma trận suy biến).")
+    def solve_equation(self):
+        try:
+            n = self.n.get()
+            A = np.array([[float(entry.get()) for entry in row] for row in self.A])
+            B = np.array([float(entry.get()) for entry in self.B])
 
-# Gọi hàm để giải hệ phương trình
-tinh_toan()
+            X = np.linalg.solve(A, B)
+
+            for widget in self.result_frame.winfo_children():
+                widget.destroy()
+
+            ttk.Label(self.result_frame, text="Kết quả:").grid(row=0, column=0, sticky=tk.W)
+            for i, x in enumerate(X):
+                ttk.Label(self.result_frame, text=f"x{i+1} = {x:.4f}").grid(row=i+1, column=0, sticky=tk.W)
+
+        except np.linalg.LinAlgError:
+            messagebox.showerror("Lỗi", "Ma trận A không khả nghịch. Hệ phương trình có thể không có nghiệm hoặc có vô số nghiệm.")
+        except ValueError:
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ các hệ số và đảm bảo chúng là số.")
+    # Rest of the code remains the same...
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = EquationSolver(root)
+    root.mainloop()
