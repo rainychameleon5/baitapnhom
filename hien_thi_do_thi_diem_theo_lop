@@ -1,132 +1,113 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk
 import matplotlib.pyplot as plt
 import pandas as pd
-import logging
-# Load the CSV data
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-csv_data = None
+# Đọc dữ liệu từ file CSV
+csv_data = pd.read_csv('diemPython.csv')
 
-def load_csv(file_path):
-    global csv_data
-    try:
-        csv_data = pd.read_csv(file_path)
-        logging.info(f"Đã tải file CSV: {file_path}")
-        update_class_dropdown()
-    except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể đọc file CSV:\n{e}")
+# Biến toàn cục để lưu loại biểu đồ
+chart_type = "line"
 
-# Function để cập nhật dropdown sau khi chọn file CSV
-def update_class_dropdown():
-    if csv_data is not None:
-        if "Mã lớp" in csv_data.columns:
-            class_dropdown['values'] = csv_data["Mã lớp"].unique().tolist()
-            if not class_dropdown['values']:
-                messagebox.showwarning("Cảnh báo", "Không tìm thấy lớp nào trong file CSV.")
-            else:
-                class_var.set('')  # Đặt giá trị mặc định nếu có
-        else:
-            messagebox.showerror("Lỗi", "File CSV không có cột 'Mã lớp'.")
-            class_dropdown['values'] = []
-            class_var.set('')
-    else:
-        class_dropdown['values'] = []
-        class_var.set('')
-
-# Function để mở hộp thoại chọn file và tải dữ liệu
-def browse_file():
-    file_path = filedialog.askopenfilename(
-        title="Chọn file CSV",
-        filetypes=(("CSV files", "*.csv"), ("All files", "*.*"))
-    )
-    if file_path:
-        load_csv(file_path)
-
-# Function to plot data for selected class
-def plot_grades(selected_class, chart_type):
-    if csv_data is None:
-        messagebox.showwarning("Cảnh báo", "Vui lòng chọn file CSV trước.")
-        return
+# Hàm vẽ biểu đồ dữ liệu của lớp đã chọn dựa trên loại biểu đồ và hiển thị số sinh viên bị điểm F
+def plot_grades(selected_class):
+    # Lọc dữ liệu theo lớp đã chọn
     selected_data = csv_data[csv_data["Mã lớp"] == selected_class]
 
     if not selected_data.empty:
-        # Extract the grade data for the selected class
+        # Lấy dữ liệu điểm theo các loại A+, A, B+, B, C+, C, D+, D, F cho lớp đã chọn
         grades = ["Loại A+", "Loại A", "Loại B+", "Loại B", "Loại C+", "Loại C", "Loại D+", "Loại D", "Loại F"]
-        missing_grades = [grade for grade in grades if grade not in selected_data.columns]
-        if missing_grades:
-            messagebox.showerror("Lỗi", f"File CSV thiếu các cột điểm sau: {', '.join(missing_grades)}")
-            return
-
         grade_values = [selected_data[grade].values[0] for grade in grades]
 
+        # Vẽ biểu đồ dựa trên loại sơ đồ được chọn
         plt.figure(figsize=(8, 6))
-
-        if chart_type == 'bar':
-            # Plot the data as a bar chart
-            plt.bar(grades, grade_values, color='skyblue')
-            plt.title(f"Grade Distribution (Bar Chart) for Class {selected_class}")
-            logging.info(f"Vẽ biểu đồ cột cho lớp {selected_class}")
-        elif chart_type == 'line':
-            # Plot the data as a line chart
+        if chart_type == "line":
             plt.plot(grades, grade_values, marker='o', linestyle='-', color='blue', markersize=8)
-            plt.title(f"Grade Distribution (Line Chart) for Class {selected_class}")
-            logging.info(f"Vẽ biểu đồ đường cho lớp {selected_class}")
-        plt.xlabel("Grade")
-        plt.ylabel("Number of Students")
+            plt.title(f"Phân bố điểm (Sơ đồ đường) của lớp {selected_class}")
+        else:
+            plt.bar(grades, grade_values, color='blue')
+            plt.title(f"Phân bố điểm (Sơ đồ cột) của lớp {selected_class}")
+
+        plt.xlabel("Loại điểm")
+        plt.ylabel("Số lượng sinh viên")
         plt.xticks(rotation=45)
         plt.grid(True)
         plt.tight_layout()
         plt.show()
-    else:
-        messagebox.showinfo("Thông tin", f"Không tìm thấy dữ liệu cho lớp {selected_class}.")
 
-# Function to handle the button click and plot the chart
-def on_confirm():
-    selected_class = class_var.get()  # Get the selected class
-    chart_type = chart_var.get()  # Get the selected chart type (bar or line)
-    if selected_class:  # Ensure a class is selected before plotting
-        plot_grades(selected_class, chart_type)
-    else:
-        messagebox.showwarning("Cảnh báo", "Vui lòng chọn lớp trước khi xác nhận.")
 
-# Create the main Tkinter window
+
+# Hàm hiển thị số sinh viên đạt loại điểm khi chọn radio button
+def show_grade_count(selected_class, grade):
+    selected_data = csv_data[csv_data["Mã lớp"] == selected_class]
+
+    if not selected_data.empty:
+        count = selected_data[grade].values[0]
+        listed_f_students.config(state=tk.NORMAL)
+        listed_f_students.delete(1.0, tk.END)
+        listed_f_students.insert(tk.END, f"Lớp {selected_class} có {count} sinh viên đạt {grade}.")
+        listed_f_students.config(state=tk.DISABLED)
+
+# Hàm xử lý sự kiện khi người dùng chọn lớp từ menu
+def on_select(event):
+    selected_class = class_var.get()
+
+    show_grade_count(selected_class, grade_var.get())
+
+# Hàm chuyển đổi loại biểu đồ
+def set_chart_type_to_line():
+    global chart_type
+    chart_type = "line"
+    selected_class = class_var.get()
+    plot_grades(selected_class)
+
+def set_chart_type_to_bar():
+    global chart_type
+    chart_type = "bar"
+    selected_class = class_var.get()
+    plot_grades(selected_class)
+
+# Tạo cửa sổ chính của giao diện Tkinter
 root = tk.Tk()
-root.title("Grade Viewer")
+root.title("Xem điểm")
 
-main_frame = ttk.Frame(root, padding="10")
-main_frame.pack(fill=tk.BOTH, expand=True)
-
-# Thêm nút "Chọn File CSV"
-browse_button = ttk.Button(main_frame, text="Chọn File CSV", command=browse_file)
-browse_button.pack(pady=5)
-
-# Create a dropdown menu for class selection
+# Tạo menu thả xuống để chọn lớp
 class_var = tk.StringVar()
 class_label = ttk.Label(root, text="Chọn lớp:")
 class_label.pack(pady=5)
 
 class_dropdown = ttk.Combobox(root, textvariable=class_var)
+class_dropdown['values'] = csv_data["Mã lớp"].unique().tolist()
 class_dropdown.pack(pady=5)
-class_dropdown.bind("<<ComboboxSelected>>", lambda event: None)  # Không cần gọi on_confirm tại đây
+class_dropdown.bind("<<ComboboxSelected>>", on_select)
+
+# Tạo hai nút để chọn loại biểu đồ
+button_frame = ttk.Frame(root)
+button_frame.pack(pady=5)
+
+# Nút nhấn để chọn loại biểu đồ là sơ đồ đường
+line_button = ttk.Button(button_frame, text="Sơ đồ đường", command=set_chart_type_to_line)
+line_button.pack(side=tk.LEFT, padx=5)
+
+# Nút nhấn để chọn loại biểu đồ là sơ đồ cột
+bar_button = ttk.Button(button_frame, text="Sơ đồ cột", command=set_chart_type_to_bar)
+bar_button.pack(side=tk.LEFT, padx=5)
 
 
-# Create radio buttons to select the chart type (Bar or Line)
-chart_var = tk.StringVar(value='bar')  # Default chart type is 'bar'
 
+# Text widget để liệt kê số sinh viên bị điểm F hoặc loại điểm khác
+listed_f_students = tk.Text(root, height=2, width=50, state=tk.DISABLED)
+listed_f_students.pack(pady=5)
 
-bar_radio = ttk.Radiobutton(root, text="Đồ thị cột", variable=chart_var, value='bar')
-line_radio = ttk.Radiobutton(root, text="Đồ thị đường", variable=chart_var, value='line')
+# Tạo các radio button để chọn loại điểm
+grade_var = tk.StringVar(value="Loại A+")  # Giá trị mặc định
 
-chart_label = ttk.Label(root, text="Chọn loại đồ thị:")
-chart_label.pack(pady=5)
+grades = ["Loại A+", "Loại A", "Loại B+", "Loại B", "Loại C+", "Loại C", "Loại D+", "Loại D", "Loại F"]
 
-bar_radio.pack(pady=2)
-line_radio.pack(pady=2)
+# Tạo các radio button và thêm vào giao diện để chọn loại điểm
+for grade in grades:
+    radio_button = tk.Radiobutton(root, text=grade, variable=grade_var, value=grade, command=lambda: show_grade_count(class_var.get(), grade_var.get()))
+    radio_button.pack(anchor=tk.W)
 
-# Create a button to confirm the selection and show the chart
-confirm_button = ttk.Button(root, text="Xác nhận", command=on_confirm)
-confirm_button.pack(pady=10)
-
-# Run the Tkinter event loop
+# Chạy vòng lặp sự kiện Tkinter
 root.mainloop()
