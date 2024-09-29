@@ -1,0 +1,76 @@
+import tkinter as tk
+from tkinter import ttk
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Load the CSV data
+csv_data = pd.read_csv('diemPython.csv')
+
+
+# Function to plot data for selected class
+def plot_grades(selected_class, chart_type):
+    selected_data = csv_data[csv_data["Mã lớp"] == selected_class]
+
+    if not selected_data.empty:
+        # Extract the grade data for the selected class
+        grades = ["Loại A+", "Loại A", "Loại B+", "Loại B", "Loại C+", "Loại C", "Loại D+", "Loại D", "Loại F"]
+        grade_values = [selected_data[grade].values[0] for grade in grades]
+
+        plt.figure(figsize=(8, 6))
+
+        if chart_type == 'bar':
+            # Plot the data as a bar chart
+            plt.bar(grades, grade_values, color='skyblue')
+            plt.title(f"Grade Distribution (Bar Chart) for Class {selected_class}")
+        elif chart_type == 'line':
+            # Plot the data as a line chart
+            plt.plot(grades, grade_values, marker='o', linestyle='-', color='blue', markersize=8)
+            plt.title(f"Grade Distribution (Line Chart) for Class {selected_class}")
+
+        plt.xlabel("Grade")
+        plt.ylabel("Number of Students")
+        plt.xticks(rotation=45)
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+
+# Function to handle the button click and plot the chart
+def on_confirm():
+    selected_class = class_var.get()  # Get the selected class
+    chart_type = chart_var.get()  # Get the selected chart type (bar or line)
+    if selected_class:  # Ensure a class is selected before plotting
+        plot_grades(selected_class, chart_type)
+
+
+# Create the main Tkinter window
+root = tk.Tk()
+root.title("Grade Viewer")
+
+# Create a dropdown menu for class selection
+class_var = tk.StringVar()
+class_label = ttk.Label(root, text="Chọn lớp:")
+class_label.pack(pady=5)
+
+class_dropdown = ttk.Combobox(root, textvariable=class_var)
+class_dropdown['values'] = csv_data["Mã lớp"].unique().tolist()
+class_dropdown.pack(pady=5)
+
+# Create radio buttons to select the chart type (Bar or Line)
+chart_var = tk.StringVar(value='bar')  # Default chart type is 'bar'
+
+bar_radio = ttk.Radiobutton(root, text="Đồ thị cột", variable=chart_var, value='bar')
+line_radio = ttk.Radiobutton(root, text="Đồ thị đường", variable=chart_var, value='line')
+
+chart_label = ttk.Label(root, text="Chọn loại đồ thị:")
+chart_label.pack(pady=5)
+
+bar_radio.pack(pady=2)
+line_radio.pack(pady=2)
+
+# Create a button to confirm the selection and show the chart
+confirm_button = ttk.Button(root, text="Xác nhận", command=on_confirm)
+confirm_button.pack(pady=10)
+
+# Run the Tkinter event loop
+root.mainloop()
