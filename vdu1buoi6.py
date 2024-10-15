@@ -5,9 +5,11 @@ from PIL import Image, ImageTk
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Global variables to hold images
+# Global variables to hold images for each filter
 original_image = None
-processed_image = None
+blurred_image = None
+sharpened_image = None
+bw_image = None
 
 # Function to open an image file
 def open_image():
@@ -16,7 +18,7 @@ def open_image():
     if file_path:
         original_image = cv2.imread(file_path)
         display_image(original_image, canvas_original)
-        show_in_new_window(original_image, title="Original Image")  # Display original image in a separate window
+        show_in_new_window(original_image, title="Ảnh gốc")  # Display original image in a separate window
 
 # Function to display image on canvas
 def display_image(img, canvas):
@@ -29,28 +31,36 @@ def display_image(img, canvas):
 
 # Apply blur filter
 def apply_blur():
-    global processed_image
+    global blurred_image
     if original_image is not None:
-        processed_image = cv2.GaussianBlur(original_image, (15, 15), 0)  # Apply blur
-        display_image(processed_image, canvas_blur)
-        show_in_new_window(processed_image, title="Blurred Image")
+        blurred_image = cv2.GaussianBlur(original_image, (15, 15), 0)  # Apply blur
+        display_image(blurred_image, canvas_blur)
+        show_in_new_window(blurred_image, title="Ảnh làm mờ")
 
 # Apply sharpen filter
 def apply_sharpen():
-    global processed_image
+    global sharpened_image
     if original_image is not None:
         kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])  # Sharpening kernel
-        processed_image = cv2.filter2D(original_image, -1, kernel)
-        display_image(processed_image, canvas_sharpen)
-        show_in_new_window(processed_image, title="Sharpened Image")
+        sharpened_image = cv2.filter2D(original_image, -1, kernel)
+        display_image(sharpened_image, canvas_sharpen)
+        show_in_new_window(sharpened_image, title="Ảnh làm nét")
 
 # Apply black and white filter
 def apply_black_white():
-    global processed_image
+    global bw_image
     if original_image is not None:
-        processed_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
-        display_image(processed_image, canvas_bw)
-        show_in_new_window(processed_image, title="Black & White Image")
+        bw_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
+        display_image(bw_image, canvas_bw)
+        show_in_new_window(bw_image, title="Ảnh đen trắng")
+
+# Function to save specific image to file
+def save_image(image, filter_name):
+    if image is not None:
+        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg")])
+        if file_path:
+            cv2.imwrite(file_path, image)
+            messagebox.showinfo("Lưu ảnh", f"Ảnh {filter_name} đã lưu thành công tại {file_path}")
 
 # Display image in a new window using matplotlib
 def show_in_new_window(image, title="Image"):
@@ -61,18 +71,9 @@ def show_in_new_window(image, title="Image"):
     plt.axis('off')  # Hide axes
     plt.show()
 
-# Save processed image to file
-def save_image():
-    global processed_image
-    if processed_image is not None:
-        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg")])
-        if file_path:
-            cv2.imwrite(file_path, processed_image)
-            messagebox.showinfo("Image Saved", f"Image saved successfully at {file_path}")
-
 # Set up the GUI
 root = tk.Tk()
-root.title("Image Filter Application")
+root.title("Ứng dụng bộ lọc ảnh")
 
 # Original image holder
 original_image = tk.Label(root)
@@ -95,18 +96,27 @@ canvas_bw.grid(row=0, column=3, padx=10, pady=10)
 button_frame = tk.Frame(root)
 button_frame.grid(row=1, column=0, columnspan=4, pady=10)
 
-open_button = tk.Button(button_frame, text="Chọn ảnh", command=open_image)
-open_button.grid(row=0, column=1, padx=10)
+open_button = tk.Button(button_frame, text="Mở ảnh", command=open_image)
+open_button.grid(row=0, column=0, padx=10)
 
 blur_button = tk.Button(button_frame, text="Làm mờ", command=apply_blur)
-blur_button.grid(row=1, column=0, padx=10)
+blur_button.grid(row=0, column=1, padx=10)
 
 sharpen_button = tk.Button(button_frame, text="Làm nét", command=apply_sharpen)
-sharpen_button.grid(row=1, column=1, padx=10)
+sharpen_button.grid(row=0, column=2, padx=10)
 
 bw_button = tk.Button(button_frame, text="Đen trắng", command=apply_black_white)
-bw_button.grid(row=1, column=2, padx=10)
+bw_button.grid(row=0, column=3, padx=10)
 
+# Save buttons under each processed image
+save_blur_button = tk.Button(root, text="Lưu ảnh làm mờ", command=lambda: save_image(blurred_image, "làm mờ"))
+save_blur_button.grid(row=2, column=1, padx=10, pady=10)
+
+save_sharpen_button = tk.Button(root, text="Lưu ảnh làm nét", command=lambda: save_image(sharpened_image, "làm nét"))
+save_sharpen_button.grid(row=2, column=2, padx=10, pady=10)
+
+save_bw_button = tk.Button(root, text="Lưu ảnh đen trắng", command=lambda: save_image(bw_image, "đen trắng"))
+save_bw_button.grid(row=2, column=3, padx=10, pady=10)
 
 # Run the application
 root.mainloop()
