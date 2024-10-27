@@ -4,6 +4,8 @@ from tkinter import messagebox, scrolledtext
 from sympy import symbols, simplify, Eq, solve, diff, integrate, limit, sympify, solveset
 from sympy.calculus.util import minimum, maximum
 import numpy as np
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
 # Khai báo biến của sympy
@@ -28,6 +30,74 @@ def get_expression():
         messagebox.showerror("Lỗi", "Biểu thức không hợp lệ!")
         return None
 
+def delete_last_character():
+  """Xóa một ký tự ở vị trí con trỏ trong ô nhập"""
+  cursor_position = entry_expr.index(tk.INSERT)
+  if cursor_position > 0:
+    entry_expr.delete(cursor_position - 1)
+
+def insert_to_entry(value):
+  """Chèn ký tự vào vị trí con trỏ trong ô nhập"""
+  cursor_position = entry_expr.index(tk.INSERT)
+  entry_expr.insert(cursor_position, value)
+
+
+def clear_entry():
+  """Xóa toàn bộ nội dung trong ô nhập"""
+  entry_expr.delete(0, tk.END)
+
+def tao_ban_phim_so(parent_frame):
+  """Tạo bàn phím số với các phép toán và hàm toán học"""
+  keypad_frame = tk.Frame(parent_frame, borderwidth=1, relief='solid')
+  keypad_frame.pack(side='right', padx=5)
+
+  # Thêm các phím số và phép toán
+  keys = [
+    ['(', ')', '^', '*', 'sin'],
+    ['7', '8', '9', '/', 'cos'],
+    ['4', '5', '6', 'x', 'tan'],
+    ['1', '2', '3', '-', 'log'],
+    ['0', '.', 'Del', '+', 'C']
+  ]
+
+  # Tạo style cho các nút
+  button_style = {
+      'width': 5,
+      'height': 1,
+      'font': ('Arial', 10),
+      'padx': 2,
+      'pady': 2
+  }
+
+  for row, key_row in enumerate(keys):
+      for col, key in enumerate(key_row):
+          if key == 'Del':
+              btn = tk.Button(keypad_frame, text=key, command=delete_last_character, **button_style)
+              btn.configure(bg='#ff9999')
+          elif key == 'C':
+              btn = tk.Button(keypad_frame, text=key, command=clear_entry, **button_style)
+              btn.configure(bg='#ff6666')
+          else:
+              # Xử lý các hàm đặc biệt
+              if key in ['sin', 'cos', 'tan', 'log', 'exp']:
+                  btn = tk.Button(keypad_frame, text=key,
+                                  command=lambda k=key: insert_to_entry(f"{k}("),
+                                  **button_style)
+                  btn.configure(bg='#b3d9ff')
+              else:
+                  btn = tk.Button(keypad_frame, text=key,
+                                  command=lambda k=key: insert_to_entry(k),
+                                  **button_style)
+                  if key in ['(', ')', '^', '*', '/', 'x', '-', '+']:
+                      btn.configure(bg='#e6e6e6')
+
+          btn.grid(row=row, column=col, sticky='nsew', padx=1, pady=1)
+
+  # Configure grid to expand buttons
+  for i in range(5):  # 5 columns
+      keypad_frame.grid_columnconfigure(i, weight=1)
+  for i in range(5):  # 5 rows
+      keypad_frame.grid_rowconfigure(i, weight=1)
 
 def calc_expression():
     expr = get_expression()
@@ -123,6 +193,7 @@ label_expr.pack(side='left')
 entry_expr = tk.Entry(frame_input, width=40)
 entry_expr.pack(side='left', padx=10)
 
+tao_ban_phim_so(frame_input)
 # Tạo khung cho các nút chức năng
 frame_buttons = tk.Frame(root)
 frame_buttons.pack(pady=10, padx=10, fill='x')
