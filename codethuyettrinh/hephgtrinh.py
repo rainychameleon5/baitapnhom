@@ -89,7 +89,87 @@ class EquationSolver:
             messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ các hệ số và đảm bảo chúng là số.")
     # Rest of the code remains the same...
 
+
+def tao_ban_phim_so(root):
+    """Tạo bàn phím số ở bên phải giao diện với các nút liền kề nhau và nút xóa hoạt động đúng"""
+    # Tạo keypad trong main_frame thay vì root
+    main_frame = root.winfo_children()[0]  # Lấy main_frame đã tạo trong EquationSolver
+    keypad_frame = tk.Frame(main_frame, borderwidth=1, relief='solid')
+    keypad_frame.grid(row=1, column=3, rowspan=3, padx=2, sticky='n')  # Đặt trong cùng một main_frame với equation_frame
+
+    keys = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        ['0', '.', 'Xóa']
+    ]
+
+    def backspace():
+        """Hàm xóa ký tự cuối cùng trong ô nhập đang được chọn"""
+        selected_widget = root.focus_get()
+        if isinstance(selected_widget, tk.Entry):
+            current_text = selected_widget.get()
+            selected_widget.delete(0, tk.END)
+            selected_widget.insert(0, current_text[:-1])
+        elif isinstance(selected_widget, tk.scrolledtext.ScrolledText):
+            current_pos = selected_widget.index(tk.INSERT)
+            if current_pos != "1.0":  # Kiểm tra không phải đầu văn bản
+                prev_pos = selected_widget.index(f"{current_pos}-1c")
+                selected_widget.delete(prev_pos, current_pos)
+
+    for row, key_row in enumerate(keys):
+        for col, key in enumerate(key_row):
+            if key == "Xóa":
+                btn = tk.Button(keypad_frame, text=key, command=backspace, width=4, height=2)
+            else:
+                btn = tk.Button(keypad_frame, text=key, command=lambda k=key: insert_to_entry(k), width=4, height=2)
+            btn.grid(row=row, column=col, sticky='nsew', padx=0, pady=0)
+
+    # Configure grid to expand buttons
+    for i in range(3):  # 3 columns
+        keypad_frame.grid_columnconfigure(i, weight=1)
+    for i in range(4):  # 4 rows
+        keypad_frame.grid_rowconfigure(i, weight=1)
+def insert_to_entry(value):
+    """Chèn ký tự vào vị trí con trỏ trong ô nhập hiện đang chọn"""
+    selected_widget = root.focus_get()  # Lấy ô nhập hiện đang được chọn
+    if isinstance(selected_widget, tk.Entry) or isinstance(selected_widget, scrolledtext.ScrolledText):
+        cursor_position = selected_widget.index(tk.INSERT)
+        selected_widget.insert(cursor_position, value)
+
+
+def xoa_ky_tu():
+    """Xóa một phần tử hoặc ký tự tại vị trí con trỏ trong ô nhập hiện đang chọn"""
+    selected_widget = root.focus_get()  # Lấy ô nhập hiện đang được chọn
+    if isinstance(selected_widget, tk.Entry) or isinstance(selected_widget, scrolledtext.ScrolledText):
+        cursor_position = selected_widget.index(tk.INSERT)
+
+        # Lấy nội dung của ô nhập
+        text_content = selected_widget.get()
+
+        # Nếu có ký tự trước con trỏ
+        if cursor_position > 0:
+            # Lấy ký tự trước con trỏ
+            pre_cursor_char = text_content[cursor_position - 1]
+
+            # Nếu ký tự trước con trỏ là khoảng trắng, không làm gì
+            if pre_cursor_char == ' ':
+                return
+
+            # Xóa ký tự cuối cùng
+            selected_widget.delete(cursor_position - 1)
+
+            # Kiểm tra phần tử hoàn chỉnh
+            start = cursor_position - 1
+            while start > 0 and text_content[start - 1] not in [' ', '']:
+                start -= 1
+
+            # Xóa toàn bộ phần tử
+            if start < cursor_position - 1:  # Nếu có phần tử để xóa
+                selected_widget.delete(start, cursor_position)
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = EquationSolver(root)
+    tao_ban_phim_so(root)
     root.mainloop()
