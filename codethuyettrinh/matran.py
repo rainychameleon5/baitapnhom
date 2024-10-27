@@ -197,6 +197,93 @@ def chia_ma_tran():
         messagebox.showerror("Lỗi", "Không hợp lệ")
 
 
+# Thêm hàm tạo bàn phím số
+def tao_ban_phim_so(root):
+    """Tạo bàn phím số với nút dấu cách"""
+    keypad_frame = tk.Frame(root, borderwidth=1, relief='solid')
+    keypad_frame.grid(row=4, column=3, rowspan=4, padx=2, sticky='nsew')
+
+    keys = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        ['0', '.', 'Xóa'],
+        ['Space']  # Thêm hàng mới cho nút dấu cách
+    ]
+
+    def backspace():
+        """Hàm xóa ký tự cuối cùng trong ô nhập đang được chọn"""
+        selected_widget = root.focus_get()
+        if isinstance(selected_widget, tk.Entry):
+            current_text = selected_widget.get()
+            selected_widget.delete(0, tk.END)
+            selected_widget.insert(0, current_text[:-1])
+        elif isinstance(selected_widget, scrolledtext.ScrolledText):
+            current_pos = selected_widget.index(tk.INSERT)
+            if current_pos != "1.0":  # Kiểm tra không phải đầu văn bản
+                # Lấy vị trí trước đó
+                prev_pos = selected_widget.index(f"{current_pos}-1c")
+                selected_widget.delete(prev_pos, current_pos)
+
+    for row, key_row in enumerate(keys):
+        for col, key in enumerate(key_row):
+            if key == "Xóa":
+                btn = tk.Button(keypad_frame, text=key, command=backspace, width=4, height=2)
+            elif key == "Space":
+                # Tạo nút dấu cách với độ rộng bằng 3 nút thông thường
+                btn = tk.Button(keypad_frame, text="Dấu cách",
+                                command=lambda: insert_to_entry(" "),
+                                width=14, height=2)
+                btn.grid(row=row, column=0, columnspan=3, sticky='nsew', padx=0, pady=0)
+                continue
+            else:
+                btn = tk.Button(keypad_frame, text=key, command=lambda k=key: insert_to_entry(k), width=4, height=2)
+
+            if key != "Space":  # Chỉ grid các nút không phải Space theo cách thông thường
+                btn.grid(row=row, column=col, sticky='nsew', padx=0, pady=0)
+
+    # Configure grid to expand buttons
+    for i in range(3):  # 3 columns
+        keypad_frame.grid_columnconfigure(i, weight=1)
+    for i in range(5):  # 5 rows (thêm 1 hàng cho Space)
+        keypad_frame.grid_rowconfigure(i, weight=1)
+def insert_to_entry(value):
+    """Chèn ký tự vào vị trí con trỏ trong ô nhập hiện đang chọn"""
+    selected_widget = root.focus_get()  # Lấy ô nhập hiện đang được chọn
+    if isinstance(selected_widget, tk.Entry) or isinstance(selected_widget, scrolledtext.ScrolledText):
+        cursor_position = selected_widget.index(tk.INSERT)
+        selected_widget.insert(cursor_position, value)
+
+
+def xoa_ky_tu():
+    """Xóa một phần tử hoặc ký tự tại vị trí con trỏ trong ô nhập hiện đang chọn"""
+    selected_widget = root.focus_get()  # Lấy ô nhập hiện đang được chọn
+    if isinstance(selected_widget, tk.Entry) or isinstance(selected_widget, scrolledtext.ScrolledText):
+        cursor_position = selected_widget.index(tk.INSERT)
+
+        # Lấy nội dung của ô nhập
+        text_content = selected_widget.get()
+
+        # Nếu có ký tự trước con trỏ
+        if cursor_position > 0:
+            # Lấy ký tự trước con trỏ
+            pre_cursor_char = text_content[cursor_position - 1]
+
+            # Nếu ký tự trước con trỏ là khoảng trắng, không làm gì
+            if pre_cursor_char == ' ':
+                return
+
+            # Xóa ký tự cuối cùng
+            selected_widget.delete(cursor_position - 1)
+
+            # Kiểm tra phần tử hoàn chỉnh
+            start = cursor_position - 1
+            while start > 0 and text_content[start - 1] not in [' ', '']:
+                start -= 1
+
+            # Xóa toàn bộ phần tử
+            if start < cursor_position - 1:  # Nếu có phần tử để xóa
+                selected_widget.delete(start, cursor_position)
 # Tạo giao diện người dùng
 root = tk.Tk()
 root.title("Phép toán ma trận")
@@ -265,7 +352,9 @@ tk.Label(root, text="Kết quả:").grid(row=22, column=0, columnspan=2)
 text_result = scrolledtext.ScrolledText(root, height=10, width=40)
 text_result.grid(row=23, column=0, columnspan=2)
 
+tao_ban_phim_so(root)
 n = 0  # Số lượng ma trận
 dsach = []  # Danh sách để lưu các ma trận
+
 
 root.mainloop()
