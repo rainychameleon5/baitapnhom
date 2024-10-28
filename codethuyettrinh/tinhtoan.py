@@ -250,6 +250,15 @@ for (text, row, col) in buttons:
     elif text == 'e':  # Define the 'e' button behavior
         tk.Button(root, text=text, width=5, height=2, font=("Arial", 18),
                   command=lambda: button_click("e")).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+    elif text == 'sin':
+        tk.Button(root, text=text, width=5, height=2, font=("Arial", 18),
+                  command=lambda: button_click("sin(")).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+    elif text == 'cos':
+        tk.Button(root, text=text, width=5, height=2, font=("Arial", 18),
+                  command=lambda: button_click("cos(")).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+    elif text == 'tan':
+        tk.Button(root, text=text, width=5, height=2, font=("Arial", 18),
+                  command=lambda: button_click("tan(")).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
     else:
         tk.Button(root, text=text, width=5, height=2, font=("Arial", 18),
                   command=lambda t=text: button_click(t)).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
