@@ -1,0 +1,5 @@
+phần mềm hỗ trợ học tập môn giải tích
+
+nhập phương trình từ bàn phím hoặc các nút ấn có sẵn trên giao diện
+thực hiện các chức năng bằng cách nhấn vào chức năng muốn thực hiện trên giao diện,
+kết quả hiển thị trên box kết quả, nếu đồ thị sẽ hiển thị trên 1 cửa sổ mới.
