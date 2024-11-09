@@ -1,0 +1,8 @@
+Ứng dụng giải hệ phương trình tuyến tính n phương trình n ẩn
+
+Nhập số vào các ô, có thể dùng bàn phím hoặc click vào các nút có sẵn trong giao diện.
+Nhập số vào ô số phương trình/ẩn, nếu không nhập sẽ mặc định là hệ 2 phương trình 2 ẩn.
+Sau khi nhập các số ở ô đã có, nhấn giải hệ phương trình để tính toán, 
+kết quả sẽ hiện ở box kết quả bên dưới.
+
+Nút thoát để thoát ứng dụng.
