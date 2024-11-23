@@ -1,0 +1,7 @@
+Game hứng hoa quả
+Nhấn Space để bắt đầu game
+Dùng nhút trái phải để di chuyển chim nhặt hoa quả
+Mỗi loại hoa quả có mức điểm khác nhau
+Nếu trúng bom bị trừ 1 mạng, trừ hết 3 mạng là thua
+Khi thua hiển thị điểm, kỉ lục
+Nhấn space để bắt đầu lại, Esc để thoát game.
