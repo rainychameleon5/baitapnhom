@@ -98,6 +98,27 @@ def draw_lives(lives, img, x, y):
     for i in range(lives):
         screen.blit(img, (x + 40 * i, y))
 
+# Đọc kỷ lục từ file
+def load_high_score():
+    try:
+        with open("high_score.txt", "r") as file:
+            return int(file.read())
+    except FileNotFoundError:
+        return 0
+
+# Ghi kỷ lục vào file
+def save_high_score(high_score):
+    with open("high_score.txt", "w") as file:
+        file.write(str(high_score))
+
+# Tải kỷ lục khi khởi chạy
+high_score = load_high_score()
+
+# Cập nhật và lưu kỷ lục trong game_over
+if score > high_score:
+    high_score = score
+    save_high_score(high_score)
+
 # Vòng lặp chính của game
 while True:
     for event in pygame.event.get():
@@ -117,19 +138,30 @@ while True:
             start_game = True
         continue
 
+    # Biến toàn cục cho kỷ lục
+    high_score = 0
+
     # Kiểm tra game over
     if game_over:
         pygame.mixer.Sound.stop(game_music)  # Dừng nhạc nền
         screen.blit(game_over_img, (0, 0))  # Vẽ hình nền game over
 
+        # Cập nhật kỷ lục nếu điểm hiện tại cao hơn
+        if score > high_score:
+            high_score = score
+
         # Hiển thị chữ "GAME OVER"
         font = pygame.font.SysFont(None, 75)
-        draw_text("GAME OVER", font, BLACK, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 100)
+        draw_text("GAME OVER", font, BLACK, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 - 150)
+
+        # Hiển thị điểm hiện tại và kỷ lục
+        font = pygame.font.SysFont(None, 55)
+        draw_text(f"Your Score: {score}", font, BLACK, SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 50)
+        draw_text(f"High Score: {high_score}", font, BLACK, SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2)
 
         # Hiển thị hướng dẫn nhấn phím
-        font = pygame.font.SysFont(None, 55)
-        draw_text("Press SPACE to Restart", font, BLACK, SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2)
-        draw_text("Press ESC to Quit", font, BLACK, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 + 60)
+        draw_text("Press SPACE to Restart", font, BLACK, SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2 + 100)
+        draw_text("Press ESC to Quit", font, BLACK, SCREEN_WIDTH // 2 - 200, SCREEN_HEIGHT // 2 + 160)
 
         pygame.display.update()
 
